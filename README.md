@@ -1,1 +1,2 @@
 this was for my science fair at baton rouge magnet high, you can use this project for whatever you want.
+you will need OpenCV, numpy, pyinput, picamera2(raspberry pi), and ai_edge_litert installed on your raspberry pi.
