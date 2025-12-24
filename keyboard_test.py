@@ -12,16 +12,21 @@ import subprocess
 # I've created the design, logic flow, and import structure.
 # While Generative AI Assistance (Gemini, Claude, Kimi, Github Copilot) was used for code debugging and library implemetation assistance.
 
-# --- AI assisted lines and prompts ---
-# line 6 - pylance couldnt import cv2 pyinput keyboard and litert (gemini 3 flash)
-# lines 57-65, 126 - 168 help me implement litert into the code (gemini 3 flash)
-# lines 111 - 120 amixer functions do not work, why? (claude sonnet 4.5)
-# lines 130 - 174 help me implement piper tts into the code (claude sonnet 4.5)
-# lines 176 - 190 why does my camera code not work into the ui? (claude sonnet 4.5)
-# lines 175 - 225, 251-252 how do you setup the ai model to detect objects and give feedback? (github copilot)
-# --- end ai acknolegements section ---
+# --- START AI ACKNOWLEDGEMENTS SECTION ---
+# 1. Environment & Imports:
+#    - Resolved Pylance environment issues for 'cv2' and 'ai_edge_litert'.
+#    - Implemented 'pynput' keyboard listeners to simulate GPIO button hardware events.
+# 2. Computer Vision & Inference (Lines 57-70, 186-226):
+#    - Integrated LiteRT (TFLite) interpreter for on-device inference.
+#    - Assisted in mapping model output tensors to readable label arrays.
+# 3. Audio & TTS Pipeline (Lines 130-180):
+#    - Debugged 'amixer' shell commands for USB audio card channel management (-c 2).
+#    - Structured the subprocess pipeline to stream Piper TTS text-to-speech to 'aplay'.
+# 4. Image Processing & Logic (Lines 129-136, 261-276):
+#    - GitHub Copilot provided direction for spatial object detection (Left/Right/Front).
+#    - Claude 3.5 Sonnet assisted with OpenCV frame rotation and UI text overlays.
+# --- END AI ACKNOWLEDGEMENTS SECTION ---
 
-# --- test config for keyboard ---
 # path of the parts
 main_folder = os.path.expanduser("~/ai_science_fair_proj")
 cv_model = os.path.join(main_folder, "detect.tflite")

@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 from pynput import keyboard
 from picamera2 import Picamera2
-from ai_edge_litert import interpreter as litert
+from ai_edge_litert import interpreter as litert #interpreter compiles all of the data from the photo and describes the objects in simpler terms
 import subprocess
 import RPi.GPIO as GPIO
 
@@ -13,29 +13,35 @@ import RPi.GPIO as GPIO
 # I've created the design, logic flow, and import structure.
 # While Generative AI Assistance (Gemini, Claude, Kimi, Github Copilot) was used for code debugging and library implemetation assistance.
 
-# --- AI Assistance Details ---
-# 1. Environment Setup & Troubleshooting (Lines 5-11):
-#    - Gemini 3 Flash assisted in resolving Pylance import errors for 'cv2', 'pynput', 
+# --- START AI ACKNOWLEDGEMENTS SECTION ---
+# 1. Environment Setup & Troubleshooting (Lines 5-9):
+#    - Gemini 3 Flash assisted in fixing Pylance import errors for 'cv2', 'pynput', 
 #      and 'ai_edge_litert' inside the Raspberry Pi environment.
-# 2. AI detection (Lines 57-73 & 163-205):
-#    - Gemini 3 Flash provided implementation details for 'ai_edge_litert' 
-#      Interpreter (LiteRT), including tensor allocation and output parsing.
-# 3. Audio & Volume Control (Lines 111-125):
+# 2. GPIO enabled (Lines 97-101)
+#    - Claude 4.5 Sonnet helped with GPIO button support
+# 3. AI detection (Lines 68-81 & 207-240):
+#    - Gemini 3 Flash provided implementation details for LiteRT 
+#      Interpreter (LiteRT), including tensor allocation (saving ram for the AI) and getting raw AI data into a useable format for this project.
+# 4. Audio & Volume Control (Lines 111-125):
 #    - Claude 4.5 Sonnet identified 'amixer' control failures and provided the correct 
 #      shell commands for Raspberry Pi 'Speaker' and 'PCM' channels.
-# 4. Piper TTS Integration (Lines 132-160):
-#    - Claude 4.5 Sonnet helped structure the subprocess pipeline to pipe text 
-#      through Piper and stream raw audio to 'aplay'.
-# 5. Camera Preview & Rotation Logic (Lines 216-240):
+# 5. Piper TTS Integration (Lines 167-186 ):
+#    - Claude 4.5 Sonnet helped structure the audio pipeline to route text 
+#      through Piper and stream raw audio to 'aplay' or straight directly to the tts system where there is no audio latency.
+# 6. Camera Preview & Rotation Logic (Lines 216-240):
 #    - Claude 4.5 Sonnet debugged the 'Picamera2' capture loop and integrated 
 #      OpenCV rotation constants for hardware-mounted camera adjustments.
-# 6. Object Detection Logic (Lines 185-200, 248-255):
+# 7. Object Detection Logic (Lines 143-150, 280-285):
 #    - Gemini 3 Flash suggested the logic for calculating object center-offsets 
 #      to provide directional feedback (Left/Front/Right).
-#    - Github Copilot assisted the debugging for openCV's rgb2bgr conversion.
+#    - Github Copilot assisted the debugging for OpenCV's rgb2bgr conversion.
 # --- END AI ACKNOWLEDGEMENTS SECTION ---
 
+
 # --- GPIO config ---
+Camera_Button = 17
+Volume_Button = 26
+
 # path of the parts
 main_folder = os.path.expanduser("~/ai_science_fair_proj")
 cv_model = os.path.join(main_folder, "detect.tflite")
@@ -54,10 +60,6 @@ camera_rotation = 0
 piper_path = os.path.join(main_folder, "piper", "piper") 
 piper_model = os.path.join(main_folder, "voice_models", "voice.onnx")
 use_tts = True  
-
-# GPIO pin configuration
-Camera_Button = 17
-Volume_Button = 26
 
 class CVTesting:
     """
@@ -94,14 +96,12 @@ class CVTesting:
         self.timer_start = 0
         self.hold_time = 0.5
         self.exit = False
-
-        # Setup GPIO
+        
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(Camera_Button, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.setup(Volume_Button, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        
-        # Add event detection for AI capture button
-        GPIO.add_event_detect(Camera_Button, GPIO.FALLING, callback=self.ai_button_pressed, bouncetime=300)
+
+        GPIO.add_event_detect(Camera_Button, GPIO.FALLING, callback=self.cam_activate, bouncetime=300)
         
         # esc key is still there 
         self.key_listener = keyboard.Listener(on_press=self.on_press)
@@ -116,7 +116,7 @@ class CVTesting:
         except AttributeError:
             pass
 
-    def ai_button_pressed(self, channel):
+    def cam_activate(self, channel):
         """GPIO button for AI capture."""
         self.is_ai_needed = True
 
@@ -124,12 +124,10 @@ class CVTesting:
         """Check volume button state and handle hold time."""
         current_state = GPIO.input(Volume_Button)
         
-        # Button pressed (LOW due to pull-up)
         if current_state == GPIO.LOW and not self.volume_pressed:
             self.volume_pressed = True
             self.timer_start = time.time()
         
-        # Button released
         elif current_state == GPIO.HIGH and self.volume_pressed:
             duration = time.time() - self.timer_start
             self.handle_volume(duration)
@@ -168,6 +166,7 @@ class CVTesting:
                 print(f"Voice model not found at: {piper_model}")
                 return
             
+            # outputs raw audio to aplay from piper tts
             process = subprocess.Popen(
                 [piper_path, "--model", piper_model, "--output-raw"],
                 stdin=subprocess.PIPE,
@@ -296,17 +295,16 @@ class CVTesting:
                     # Check volume button state
                     self.check_volume_button()
 
-                    # Check if AI capture was requested
                     if self.is_ai_needed:
                         self.is_ai_needed = False
                         
                         results = self.analyze_frame(frame)
-                        msg = f"I see: {' and '.join(results)}" if results else "No objects found."
+                        msg = f"I see: {' and '.join(results)}" if results else "No objects found were detected."
                         print(f"{msg}")
                         
                         self.speak(msg)
 
-                    # Check for exit (ESC key only)
+                    # escape key exit
                     key = cv2.waitKey(1) & 0xFF
                     if key == 27 or self.exit:
                         break
@@ -324,11 +322,12 @@ class CVTesting:
             if picam2:
                 picam2.stop()
             
+            #clean up everything
             cv2.destroyAllWindows()
             cv2.waitKey(1)
             GPIO.cleanup()
             self.key_listener.stop()
 
-if __name__ == "__main__":
+if __name__ == "__main__": # ignition key for the script, starts everything after everything was prepared
     test_suite = CVTesting()
     test_suite.start()
