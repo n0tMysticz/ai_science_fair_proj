@@ -35,6 +35,8 @@ import RPi.GPIO as GPIO
 #    - Gemini 3 Flash suggested the logic for calculating object center-offsets 
 #      to provide directional feedback (Left/Front/Right).
 #    - Github Copilot assisted the debugging for OpenCV's rgb2bgr conversion.
+# 5. Logging Camera Data and Results (lines 50, 239-230)
+#    - Claude 4.5 Sonnet structured the logging to save images and log results.
 # --- END AI ACKNOWLEDGEMENTS SECTION ---
 
 
@@ -47,6 +49,7 @@ main_folder = os.path.expanduser("~/ai_science_fair_proj")
 cv_model = os.path.join(main_folder, "detect.tflite")
 categories = os.path.join(main_folder, "labelmap.txt")
 save_captures = os.path.join(main_folder, "captures")
+detection_log = os.path.join(main_folder, "detection_log.txt")
 cleanup = 25 # photos until deletion
 
 if not os.path.exists(save_captures):
@@ -221,6 +224,7 @@ class CVTesting:
             
             findings = []
             print("Top detections:")
+            detection_details = []
             height, width = image.shape[:2]
             for i in range(min(num_detections, 10)):
                 score = float(scores[i])
@@ -228,6 +232,7 @@ class CVTesting:
                 if 0 <= class_id < len(self.class_labels):
                     label = self.class_labels[class_id]
                     print(f"{label}: {score:.2f}")
+                    detection_details.append(f"{label}: {score:.2f}")
                 
                 if score > confidence_minimum:
                     ymin, xmin, ymax, xmax = boxes[i]
@@ -242,10 +247,20 @@ class CVTesting:
                         article = "an" if label.lower().startswith(('a', 'e', 'i', 'o', 'u')) else "a"
                         findings.append(f"{article} {label} {direction}")
             
+            msg = f"I see: {' and '.join(findings)}" if findings else "No objects found were detected."
+            
             timestamp = time.strftime("%Y%m%d-%H%M%S")
             filename = os.path.join(save_captures, f"capture_{timestamp}.jpg")
             cv2.imwrite(filename, image)
             print(f"  Photo saved to: {filename}")
+            
+            # Log findings to text file
+            log_timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+            log_message = f"[{log_timestamp}] {msg}\n"
+            if detection_details:
+                log_message += f"  Confidence scores: {', '.join(detection_details)}\n"
+            with open(detection_log, 'a') as log_file:
+                log_file.write(log_message)
             
             return findings
         except Exception as e:
