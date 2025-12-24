@@ -6,22 +6,36 @@ from pynput import keyboard
 from picamera2 import Picamera2
 from ai_edge_litert import interpreter as litert
 import subprocess
+import RPi.GPIO as GPIO
 
 # --- DISCLAIMER - AI COLLABORATIVE DEBUGGING ---
-# This script was developed by Tyler Huynh with assistance from Artifical Inteligence
+# This script was developed by Tyler Huynh with assistance from Artifical Inteligence.
 # I've created the design, logic flow, and import structure.
 # While Generative AI Assistance (Gemini, Claude, Kimi, Github Copilot) was used for code debugging and library implemetation assistance.
 
-# --- AI assisted lines and prompts ---
-# line 6 - pylance couldnt import cv2 pyinput keyboard and litert (gemini 3 flash)
-# lines 57-65, 126 - 168 help me implement litert into the code (gemini 3 flash)
-# lines 111 - 120 amixer functions do not work, why? (claude sonnet 4.5)
-# lines 130 - 174 help me implement piper tts into the code (claude sonnet 4.5)
-# lines 176 - 190 why does my camera code not work into the ui? (claude sonnet 4.5)
-# lines 175 - 225, 251-252 how do you setup the ai model to detect objects and give feedback? (github copilot)
-# --- end ai acknolegements section ---
+# --- AI Assistance Details ---
+# 1. Environment Setup & Troubleshooting (Lines 5-11):
+#    - Gemini 3 Flash assisted in resolving Pylance import errors for 'cv2', 'pynput', 
+#      and 'ai_edge_litert' inside the Raspberry Pi environment.
+# 2. AI detection (Lines 57-73 & 163-205):
+#    - Gemini 3 Flash provided implementation details for 'ai_edge_litert' 
+#      Interpreter (LiteRT), including tensor allocation and output parsing.
+# 3. Audio & Volume Control (Lines 111-125):
+#    - Claude 4.5 Sonnet identified 'amixer' control failures and provided the correct 
+#      shell commands for Raspberry Pi 'Speaker' and 'PCM' channels.
+# 4. Piper TTS Integration (Lines 132-160):
+#    - Claude 4.5 Sonnet helped structure the subprocess pipeline to pipe text 
+#      through Piper and stream raw audio to 'aplay'.
+# 5. Camera Preview & Rotation Logic (Lines 216-240):
+#    - Claude 4.5 Sonnet debugged the 'Picamera2' capture loop and integrated 
+#      OpenCV rotation constants for hardware-mounted camera adjustments.
+# 6. Object Detection Logic (Lines 185-200, 248-255):
+#    - Gemini 3 Flash suggested the logic for calculating object center-offsets 
+#      to provide directional feedback (Left/Front/Right).
+#    - Github Copilot assisted the debugging for openCV's rgb2bgr conversion.
+# --- END AI ACKNOWLEDGEMENTS SECTION ---
 
-# --- test config for keyboard ---
+# --- GPIO config ---
 # path of the parts
 main_folder = os.path.expanduser("~/ai_science_fair_proj")
 cv_model = os.path.join(main_folder, "detect.tflite")
@@ -41,12 +55,16 @@ piper_path = os.path.join(main_folder, "piper", "piper")
 piper_model = os.path.join(main_folder, "voice_models", "voice.onnx")
 use_tts = True  
 
+# GPIO pin configuration
+Camera_Button = 17
+Volume_Button = 26
+
 class CVTesting:
     """
-    Simulated computer vision model for keyboard testing.
+    Computer vision model for GPIO button control.
     """
     def __init__(self):
-        print("[Simulation] Starting computer vision!...")
+        print("Starting computer vision...")
         
         try:
             self.model = litert.Interpreter(model_path=cv_model)
@@ -70,49 +88,56 @@ class CVTesting:
             print(f"{categories} not found.")
             exit(1)
 
-        # variables based off of keybinds
+        # variables for GPIO buttons
         self.is_ai_needed = False
         self.volume_pressed = False
         self.timer_start = 0
         self.hold_time = 0.5
         self.exit = False
 
-        # keypress checker
-        self.key_listener = keyboard.Listener(
-            on_press=self.on_press,
-            on_release=self.on_release
-        )
+        # Setup GPIO
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(Camera_Button, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(Volume_Button, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        
+        # Add event detection for AI capture button
+        GPIO.add_event_detect(Camera_Button, GPIO.FALLING, callback=self.ai_button_pressed, bouncetime=300)
+        
+        # esc key is still there 
+        self.key_listener = keyboard.Listener(on_press=self.on_press)
         self.key_listener.start()
 
     def on_press(self, key):
-        """just simulates my gpio buttons for keyboard."""
+        """Emergency escape key only."""
         try:
-            if key == keyboard.Key.space:
-                self.is_ai_needed = True
-            
             if key == keyboard.Key.esc:
                 self.exit = True
                 return False
-            
-            if key == keyboard.Key.up and not self.volume_pressed:
-                self.volume_pressed = True
-                self.timer_start = time.time()
         except AttributeError:
             pass
 
-    def on_release(self, key):
-        """captures key up event for interaction time."""
-        try:
-            if key == keyboard.Key.up:
-                duration = time.time() - self.timer_start
-                self.keyboard_volume(duration)
-                self.volume_pressed = False
-                self.timer_start = 0
-        except AttributeError:
-            pass
+    def ai_button_pressed(self, channel):
+        """GPIO button for AI capture."""
+        self.is_ai_needed = True
 
-    def keyboard_volume(self, duration):
-        """volume up/down with a keypress."""
+    def check_volume_button(self):
+        """Check volume button state and handle hold time."""
+        current_state = GPIO.input(Volume_Button)
+        
+        # Button pressed (LOW due to pull-up)
+        if current_state == GPIO.LOW and not self.volume_pressed:
+            self.volume_pressed = True
+            self.timer_start = time.time()
+        
+        # Button released
+        elif current_state == GPIO.HIGH and self.volume_pressed:
+            duration = time.time() - self.timer_start
+            self.handle_volume(duration)
+            self.volume_pressed = False
+            self.timer_start = 0
+
+    def handle_volume(self, duration):
+        """volume up/down based on button press duration."""
         if duration < self.hold_time:
             print(f"Volume up (Duration: {duration:.2f}s)")
             os.system("amixer -c 2 sset Speaker 1%+ 2>/dev/null || amixer -c 2 sset PCM 1%+ 2>/dev/null")
@@ -156,7 +181,6 @@ class CVTesting:
                 print(f"Piper failed: {error.decode()}")
                 return
             
-            # "plughw:2,0 for usb audio, fix in gpio version"
             play_process = subprocess.Popen(
                 ["aplay", "-D", "plughw:2,0", "-r", "22050", "-f", "S16_LE", "-t", "raw", "-"],
                 stdin=subprocess.PIPE,
@@ -233,10 +257,10 @@ class CVTesting:
         """Main loop for video capture and UI feedback."""
         picam2 = None
         try:
-            print("Testing Active.")
-            print("-> Press spacebar to capture a scene.")
-            print("-> Tap/Hold up arrow to test volume.")
-            print("-> Press escape to exit testing.")
+            print("System Active.")
+            print("-> GPIO Pin 17: Capture photo")
+            print("-> GPIO Pin 26: Volume control (tap/hold)")
+            print("-> Press ESC key for emergency exit")
             
             picam2 = Picamera2()
             config = picam2.create_preview_configuration(
@@ -249,7 +273,7 @@ class CVTesting:
             print("Warming up camera...")
             time.sleep(2)
             
-            window_name = "Camera Activated - Testing"
+            window_name = "Camera Active"
             cv2.namedWindow(window_name, cv2.WINDOW_AUTOSIZE)
             
             while True:
@@ -269,6 +293,10 @@ class CVTesting:
                     
                     cv2.imshow(window_name, frame)
 
+                    # Check volume button state
+                    self.check_volume_button()
+
+                    # Check if AI capture was requested
                     if self.is_ai_needed:
                         self.is_ai_needed = False
                         
@@ -278,6 +306,7 @@ class CVTesting:
                         
                         self.speak(msg)
 
+                    # Check for exit (ESC key only)
                     key = cv2.waitKey(1) & 0xFF
                     if key == 27 or self.exit:
                         break
@@ -291,12 +320,13 @@ class CVTesting:
         except Exception as e:
             print(f"Failed to start camera: {e}")
         finally:
-            print("Quitting Camera")
+            print("Shutting down...")
             if picam2:
                 picam2.stop()
             
             cv2.destroyAllWindows()
             cv2.waitKey(1)
+            GPIO.cleanup()
             self.key_listener.stop()
 
 if __name__ == "__main__":
