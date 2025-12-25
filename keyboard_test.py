@@ -1,5 +1,3 @@
-from curses import raw
-from itertools import count
 import os
 import time
 import cv2
@@ -31,12 +29,13 @@ import subprocess
 #    - Claude 4.5 Sonnet assisted with logging to a text file for debugging and record-keeping.
 # --- END AI ACKNOWLEDGEMENTS SECTION ---
 
+
 # path of the parts
 main_folder = os.path.expanduser("~/ai_science_fair_proj")
-cv_model = os.path.join(main_folder, "detect.tflite")
+cv_model = os.path.join(main_folder, "detect.tflite") # it's a mobiledet ssdlite model
 categories = os.path.join(main_folder, "labelmap.txt")
 save_captures = os.path.join(main_folder, "captures")
-detection_log = os.path.join(main_folder, "detection_log.txt") 
+detection_log = os.path.join(main_folder, "detection_log.txt")  # ADDED HERE - Line 34
 cleanup = 25 # photos until deletion
 
 if not os.path.exists(save_captures):
@@ -195,21 +194,18 @@ class CVTesting:
                 print(f"Cleaned up {len(photos) - cleanup} old photos")
             
             image_prepared = cv2.resize(image, (self.input_width, self.input_height))
-            image_prepared = cv2.cvtColor(image_prepared, cv2.COLOR_BGR2RGB)
-            input_tensor   = np.expand_dims(image_prepared, axis=0).astype(np.uint8)
-            
+            input_tensor = np.expand_dims(image_prepared, axis=0).astype(np.uint8)
+
             # post-image capture
             self.model.set_tensor(self.input_specs[0]['index'], input_tensor)
             self.model.invoke()
 
-           # only one tensor output for detection
-            raw = self.model.get_tensor(self.output_specs[0]['index'])[0]
-            count = int(raw[0])
-            boxes   = raw[1:count+1, :4]          # [N,4]
-            classes = raw[1:count+1, 4].astype(int)  # [N]
-            scores  = raw[1:count+1, 5]              # [N]
-            num_detections = count
-
+            # coco formatting (boxes, classes, scores, num_detections)
+            boxes = self.model.get_tensor(self.output_specs[0]['index'])[0]
+            classes = self.model.get_tensor(self.output_specs[1]['index'])[0]
+            scores = self.model.get_tensor(self.output_specs[2]['index'])[0]
+            num_detections = int(self.model.get_tensor(self.output_specs[3]['index'])[0])
+            
             findings = []
             print("Top detections:")
             detection_details = []  
@@ -220,7 +216,7 @@ class CVTesting:
                 if 0 <= class_id < len(self.class_labels):
                     label = self.class_labels[class_id]
                     print(f"{label}: {score:.2f}")
-                    detection_details.append(f"{label}: {score:.2f}") 
+                    detection_details.append(f"{label}: {score:.2f}")  
                 
                 if score > confidence_minimum:
                     ymin, xmin, ymax, xmax = boxes[i]
@@ -241,7 +237,7 @@ class CVTesting:
             filename = os.path.join(save_captures, f"capture_{timestamp}.jpg")
             cv2.imwrite(filename, image)
             print(f"  Photo saved to: {filename}")
-
+        
             log_timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
             log_message = f"[{log_timestamp}] {msg}\n"
             if detection_details:

@@ -22,3 +22,19 @@
   Confidence scores: person: 0.68, person: 0.61, person: 0.46, person: 0.44, person: 0.41, person: 0.39, wine glass: 0.31, suitcase: 0.31, person: 0.29, chair: 0.26
 [2025-12-25 13:25:46] I see: a keyboard on your left and a keyboard on your right and a tv on your right
   Confidence scores: keyboard: 0.58, keyboard: 0.57, tv: 0.56, chair: 0.50, chair: 0.49, tv: 0.49, tv: 0.43, tv: 0.39, mouse: 0.39, chair: 0.39
+[2025-12-25 13:36:43] I see: a keyboard in front of you and a mouse on your right and a tv on your left
+  Confidence scores: keyboard: 0.71, mouse: 0.68, tv: 0.61, keyboard: 0.55, tv: 0.52, mouse: 0.51, keyboard: 0.49, keyboard: 0.49, book: 0.39, book: 0.39
+[2025-12-25 13:37:01] I see: a remote in front of you
+  Confidence scores: remote: 0.62, person: 0.25, tv: 0.23, remote: 0.21, person: 0.19, person: 0.18, traffic light: 0.15, book: 0.14, person: 0.14, traffic light: 0.14
+[2025-12-25 13:37:06] I see: a mouse in front of you and a remote in front of you
+  Confidence scores: mouse: 0.77, remote: 0.68, cell phone: 0.39, cake: 0.36, mouse: 0.36, cell phone: 0.36, remote: 0.33, pizza: 0.26, remote: 0.22, mouse: 0.21
+[2025-12-25 13:40:01] I see: a mouse in front of you and a cell phone in front of you
+  Confidence scores: mouse: 0.77, cell phone: 0.56, book: 0.44, person: 0.32, mouse: 0.30, person: 0.26, pizza: 0.26, bowl: 0.25, mouse: 0.25, mouse: 0.25
+[2025-12-25 13:40:19] I see: a keyboard in front of you and a keyboard on your left and a mouse on your right
+  Confidence scores: keyboard: 0.69, keyboard: 0.59, mouse: 0.57, chair: 0.54, tv: 0.51, keyboard: 0.46, laptop: 0.45, tv: 0.41, bowl: 0.33, cell phone: 0.33
+[2025-12-25 13:41:49] No objects found.
+  Confidence scores: person: 0.55, clock: 0.54, person: 0.44, person: 0.44, person: 0.43, clock: 0.33, tv: 0.32, person: 0.26, person: 0.21, tie: 0.21
+[2025-12-25 13:42:03] I see: a tv in front of you and a chair on your left
+  Confidence scores: tv: 0.77, chair: 0.59, person: 0.49, person: 0.39, tv: 0.39, person: 0.39, laptop: 0.36, person: 0.34, chair: 0.34, person: 0.33
+[2025-12-25 13:42:09] I see: a person on your right and a tv on your left
+  Confidence scores: person: 0.70, tv: 0.61, traffic light: 0.43, tv: 0.36, traffic light: 0.36, traffic light: 0.34, cell phone: 0.26, cell phone: 0.24, cell phone: 0.21, person: 0.21
