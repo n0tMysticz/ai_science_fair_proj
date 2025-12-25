@@ -34,7 +34,7 @@ main_folder = os.path.expanduser("~/ai_science_fair_proj")
 cv_model = os.path.join(main_folder, "detect.tflite")
 categories = os.path.join(main_folder, "labelmap.txt")
 save_captures = os.path.join(main_folder, "captures")
-detection_log = os.path.join(main_folder, "detection_log.txt")  # ADDED HERE - Line 34
+detection_log = os.path.join(main_folder, "detection_log.txt") 
 cleanup = 25 # photos until deletion
 
 if not os.path.exists(save_captures):
@@ -192,8 +192,8 @@ class CVTesting:
                     os.remove(os.path.join(save_captures, old_photo))
                 print(f"Cleaned up {len(photos) - cleanup} old photos")
             
-            image_prepared = cv2.resize(image, (self.input_width, self.input_height))
-            input_tensor = np.expand_dims(image_prepared, axis=0)
+            image_prepared = cv2.resize(image, (self.input_width, self.input_height)).astype(np.float32)
+            input_tensor = np.expand_dims(image_prepared, axis=0) / 255.0 # float scaling
 
             # post-image capture
             self.model.set_tensor(self.input_specs[0]['index'], input_tensor)
