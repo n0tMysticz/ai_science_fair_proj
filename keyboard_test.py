@@ -206,7 +206,7 @@ class CVTesting:
             
             findings = []
             print("Top detections:")
-            detection_details = []  # ADDED HERE - Line 213
+            detection_details = []  
             height, width = image.shape[:2]
             for i in range(min(num_detections, 10)):
                 score = float(scores[i])
@@ -214,7 +214,7 @@ class CVTesting:
                 if 0 <= class_id < len(self.class_labels):
                     label = self.class_labels[class_id]
                     print(f"{label}: {score:.2f}")
-                    detection_details.append(f"{label}: {score:.2f}")  # ADDED HERE - Line 221
+                    detection_details.append(f"{label}: {score:.2f}") 
                 
                 if score > confidence_minimum:
                     ymin, xmin, ymax, xmax = boxes[i]
