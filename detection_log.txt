@@ -1,0 +1,18 @@
+[2025-12-24 20:17:59] I see: bird on your right, person in front of you
+  Confidence scores: bird: 0.57, person: 0.51, car: 0.27, laptop: 0.27, backpack: 0.21, wine glass: 0.21, cat: 0.20, person: 0.20, car: 0.19, person: 0.18
+[2025-12-24 20:18:07] I see: person on your left
+  Confidence scores: person: 0.62, person: 0.41, airplane: 0.31, frisbee: 0.30, bottle: 0.30, tv: 0.24, backpack: 0.22, car: 0.21, backpack: 0.19, skateboard: 0.19
+[2025-12-24 20:18:13] No objects found.
+  Confidence scores: car: 0.41, person: 0.30, donut: 0.30, donut: 0.29, person: 0.25, person: 0.22, person: 0.21, person: 0.21, cell phone: 0.21, person: 0.18
+[2025-12-24 20:18:17] I see: bowl in front of you
+  Confidence scores: bowl: 0.52, car: 0.28, car: 0.28, person: 0.28, person: 0.27, dog: 0.27, donut: 0.22, person: 0.22, person: 0.21, person: 0.20
+[2025-12-24 20:21:13] I see: person on your left
+  Confidence scores: person: 0.59, person: 0.50, person: 0.44, person: 0.39, chair: 0.32, person: 0.32, person: 0.31, person: 0.31, person: 0.27, person: 0.27
+[2025-12-24 20:21:18] I see: person on your right, person in front of you
+  Confidence scores: person: 0.68, person: 0.54, person: 0.49, person: 0.43, person: 0.37, person: 0.37, chair: 0.28, person: 0.26, person: 0.25, person: 0.25
+[2025-12-24 20:28:00] I see: person in front of you
+  Confidence scores: person: 0.61, vase: 0.45, person: 0.43, refrigerator: 0.40, person: 0.37, person: 0.36, car: 0.34, person: 0.30, person: 0.29, person: 0.28
+[2025-12-24 21:38:00] I see: a frisbee on your left
+  Confidence scores: frisbee: 0.55, person: 0.39, laptop: 0.31, frisbee: 0.24, bowl: 0.20, tv: 0.19, laptop: 0.19, cell phone: 0.18, person: 0.18, car: 0.18
+[2025-12-24 21:38:53] I see: a person on your left
+  Confidence scores: person: 0.70, person: 0.54, traffic light: 0.49, person: 0.27, person: 0.26, traffic light: 0.24, kite: 0.21, kite: 0.18, traffic light: 0.18, kite: 0.17

@@ -35,10 +35,9 @@ import RPi.GPIO as GPIO
 #    - Gemini 3 Flash suggested the logic for calculating object center-offsets 
 #      to provide directional feedback (Left/Front/Right).
 #    - Github Copilot assisted the debugging for OpenCV's rgb2bgr conversion.
-# 5. Logging Camera Data and Results (lines 50, 239-230)
+# 8. Logging Camera Data and Results (lines 5, 257-262)
 #    - Claude 4.5 Sonnet structured the logging to save images and log results.
-# --- END AI ACKNOWLEDGEMENTS SECTION ---
-
+# --- END AI ACKNOWLEDGEMENTS SECTION --- 
 
 # --- GPIO config ---
 Camera_Button = 17
@@ -254,7 +253,6 @@ class CVTesting:
             cv2.imwrite(filename, image)
             print(f"  Photo saved to: {filename}")
             
-            # Log findings to text file
             log_timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
             log_message = f"[{log_timestamp}] {msg}\n"
             if detection_details:
