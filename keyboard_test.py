@@ -8,47 +8,46 @@ from ai_edge_litert import interpreter as litert
 import subprocess
 
 # --- DISCLAIMER - AI COLLABORATIVE DEBUGGING ---
-# This script was developed by Tyler Huynh with assistance from Artifical Inteligence.
+# This script was developed by Tyler Huynh with assistance from Artifical Inteligence
 # I've created the design, logic flow, and import structure.
 # While Generative AI Assistance (Gemini, Claude, Kimi, Github Copilot) was used for code debugging and library implemetation assistance.
 
 # --- START AI ACKNOWLEDGEMENTS SECTION ---
 # 1. Environment & Imports:
-#    - Gemini 3 Fast resolved Pylance environment issues for 'cv2' and 'ai_edge_litert' and
+#    - Resolved Pylance environment issues for 'cv2' and 'ai_edge_litert'.
 #    - Implemented 'pynput' keyboard listeners to simulate GPIO button hardware events.
 # 2. Computer Vision & Inference (Lines 57-70, 186-226):
-#    - Gemini 3 Fast integrated LiteRT (TFLite) interpreter for on-device inference.
-#    - Claude 4.5 Sonnet assisted in mapping model output tensors to readable label arrays.
+#    - Integrated LiteRT (TFLite) interpreter for on-device inference.
+#    - Assisted in mapping model output tensors to readable label arrays.
 # 3. Audio & TTS Pipeline (Lines 130-180):
-#    - Claude 4.5 Sonnet debugged 'amixer' shell commands for USB audio card channel management (-c 2).
-#    - Gemini 3 Fast and Claude 4.5 Sonnet structured the audio pipeline to stream Piper TTS text-to-speech to 'aplay'.
+#    - Debugged 'amixer' shell commands for USB audio card channel management (-c 2).
+#    - Structured the subprocess pipeline to stream Piper TTS text-to-speech to 'aplay'.
 # 4. Image Processing & Logic (Lines 129-136, 261-276):
 #    - GitHub Copilot provided direction for spatial object detection (Left/Right/Front).
-#    - Claude 4.5 Sonnet assisted with OpenCV frame rotation and UI text overlays.
-# 5. Logging Camera Data and Results (lines 38, 248-255)
-#    - Claude 4.5 Sonnet structured the logging to save images and log results.
+#    - Claude 3.5 Sonnet assisted with OpenCV frame rotation and UI text overlays.
+# 5. Logging Camera Data and Results (lines 37, 237-242)
+#    - Claude 4.5 Sonnet assisted with logging to a text file for debugging and record-keeping.
 # --- END AI ACKNOWLEDGEMENTS SECTION ---
 
-# --- test config for keyboard ---
 # path of the parts
 main_folder = os.path.expanduser("~/ai_science_fair_proj")
 cv_model = os.path.join(main_folder, "detect.tflite")
 categories = os.path.join(main_folder, "labelmap.txt")
 save_captures = os.path.join(main_folder, "captures")
-detection_log = os.path.join(main_folder, "detection_log.txt") 
+detection_log = os.path.join(main_folder, "detection_log.txt")  # ADDED HERE - Line 34
+cleanup = 25 # photos until deletion
 
 if not os.path.exists(save_captures):
     os.makedirs(save_captures)
 
-confidence_minimum = 0.5
+confidence_minimum = 0.55
 
-# Camera rotation (0, 90, 180, or 270 degrees)
 camera_rotation = 0
 
 # Piper TTS configuration
-piper_path = os.path.join(main_folder, "piper", "piper")  # Path to piper executable
-piper_model = os.path.join(main_folder, "voice_models", "en_US-lessac-medium.onnx")
-use_tts = True  # Set to False to disable voice output
+piper_path = os.path.join(main_folder, "piper", "piper") 
+piper_model = os.path.join(main_folder, "voice_models", "voice.onnx")
+use_tts = True  
 
 class CVTesting:
     """
@@ -143,20 +142,15 @@ class CVTesting:
         if not use_tts:
             return
         
-        print(f"[TTS] Attempting to speak: {text}")
-        
         try:
-            # Check if piper exists
             if not os.path.exists(piper_path):
-                print(f"[TTS ERROR] Piper not found at: {piper_path}")
+                print(f"Piper not found at: {piper_path}")
                 return
             
             if not os.path.exists(piper_model):
-                print(f"[TTS ERROR] Voice model not found at: {piper_model}")
+                print(f"Voice model not found at: {piper_model}")
                 return
             
-            print("[TTS] Generating speech...")
-            # Use piper to generate speech and play with aplay
             process = subprocess.Popen(
                 [piper_path, "--model", piper_model, "--output-raw"],
                 stdin=subprocess.PIPE,
@@ -167,23 +161,22 @@ class CVTesting:
             audio_data, error = process.communicate(input=text.encode())
             
             if process.returncode != 0:
-                print(f"[TTS ERROR] Piper failed: {error.decode()}")
+                print(f"Piper failed: {error.decode()}")
                 return
             
-            print(f"[TTS] Playing audio ({len(audio_data)} bytes)...")
-            # Play the audio with aplay on card 2 (USB audio)
+            # "plughw:2,0 for usb audio, fix in gpio version"
             play_process = subprocess.Popen(
                 ["aplay", "-D", "plughw:2,0", "-r", "22050", "-f", "S16_LE", "-t", "raw", "-"],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
+                stderr=subprocess.DEVNULL
             )
             stdout, stderr = play_process.communicate(input=audio_data)
             
             if play_process.returncode != 0:
-                print(f"[TTS ERROR] aplay failed: {stderr.decode()}")
+                print(f"aplay failed: {stderr.decode()}")
             else:
-                print("[TTS] Speech complete")
+                print("TTS complete!")
             
         except Exception as e:
             print(f"[TTS ERROR] Exception: {e}")
@@ -193,19 +186,11 @@ class CVTesting:
         print("Analyzing Photo...")
 
         try:
-            # Clean up old photos if more than 50 exist
             photos = sorted([f for f in os.listdir(save_captures) if f.startswith('capture_') and f.endswith('.jpg')])
-            if len(photos) > 50:
-                # Delete oldest photos to keep only 50
-                for old_photo in photos[:-50]:
+            if len(photos) > cleanup:
+                for old_photo in photos[:-cleanup]:
                     os.remove(os.path.join(save_captures, old_photo))
-                print(f"Cleaned up {len(photos) - 50} old photos")
-            
-            timestamp = time.strftime("%Y%m%d-%H%M%S")
-            filename = os.path.join(save_captures, f"capture_{timestamp}.jpg")
-            image_bgr = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-            cv2.imwrite(filename, image_bgr)
-            print(f"Photo saved to: {filename}")
+                print(f"Cleaned up {len(photos) - cleanup} old photos")
             
             image_prepared = cv2.resize(image, (self.input_width, self.input_height))
             input_tensor = np.expand_dims(image_prepared, axis=0)
@@ -219,23 +204,21 @@ class CVTesting:
             scores = self.model.get_tensor(self.output_specs[2]['index'])[0]
             num_detections = int(self.model.get_tensor(self.output_specs[3]['index'])[0])
             
-            # Print and log top detections with confidence scores
+            findings = []
             print("Top detections:")
-            detection_details = []
+            detection_details = []  # ADDED HERE - Line 213
+            height, width = image.shape[:2]
             for i in range(min(num_detections, 10)):
                 score = float(scores[i])
                 class_id = int(classes[i])
                 if 0 <= class_id < len(self.class_labels):
                     label = self.class_labels[class_id]
                     print(f"{label}: {score:.2f}")
-                    detection_details.append(f"{label}: {score:.2f}")
-            
-            findings = []
-            for i in range(min(num_detections, 10)):
-                score = float(scores[i])
+                    detection_details.append(f"{label}: {score:.2f}")  # ADDED HERE - Line 221
                 
                 if score > confidence_minimum:
                     ymin, xmin, ymax, xmax = boxes[i]
+                    cv2.rectangle(image, (int(xmin * width), int(ymin * height)), (int(xmax * width), int(ymax * height)), (255, 0, 0), 2)
                     
                     center_x = float((xmin + xmax) / 2)
                     class_id = int(classes[i])
@@ -243,10 +226,16 @@ class CVTesting:
                     if 0 <= class_id < len(self.class_labels):
                         label = self.class_labels[class_id]
                         direction = self.determine_location(center_x)
-                        findings.append(f"{label} {direction}")
+                        article = "an" if label.lower().startswith(('a', 'e', 'i', 'o', 'u')) else "a"
+                        findings.append(f"{article} {label} {direction}")
             
-            # logs results to txt file
-            msg = f"I see: {', '.join(findings)}" if findings else "No objects found."
+            msg = f"I see: {' and '.join(findings)}" if findings else "No objects found."
+            
+            timestamp = time.strftime("%Y%m%d-%H%M%S")
+            filename = os.path.join(save_captures, f"capture_{timestamp}.jpg")
+            cv2.imwrite(filename, image)
+            print(f"  Photo saved to: {filename}")
+
             log_timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
             log_message = f"[{log_timestamp}] {msg}\n"
             if detection_details:
@@ -286,8 +275,7 @@ class CVTesting:
                 try:
                     frame_rgb = picam2.capture_array()
                     frame = frame_rgb.copy()
-                    
-                    # Apply rotation if needed
+
                     if camera_rotation == 90:
                         frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
                     elif camera_rotation == 180:
@@ -304,15 +292,13 @@ class CVTesting:
                         self.is_ai_needed = False
                         
                         results = self.analyze_frame(frame)
-                        msg = f"I see: {', '.join(results)}" if results else "No objects found."
+                        msg = f"I see: {' and '.join(results)}" if results else "No objects found."
                         print(f"{msg}")
                         
-                        # Speak the results
                         self.speak(msg)
 
                     key = cv2.waitKey(1) & 0xFF
                     if key == 27 or self.exit:
-                        print("Test terminated")
                         break
                         
                 except KeyboardInterrupt:
