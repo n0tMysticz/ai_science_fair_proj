@@ -1,3 +1,5 @@
+from curses import raw
+from itertools import count
 import os
 import time
 import cv2
@@ -199,11 +201,13 @@ class CVTesting:
             self.model.set_tensor(self.input_specs[0]['index'], input_tensor)
             self.model.invoke()
 
-            num_outputs = len(self.output_specs)
-            boxes   = self.model.get_tensor(self.output_specs[0]['index'])[0] if num_outputs > 0 else np.zeros((0, 4))
-            classes = self.model.get_tensor(self.output_specs[1]['index'])[0] if num_outputs > 1 else np.zeros((0,))
-            scores  = self.model.get_tensor(self.output_specs[2]['index'])[0] if num_outputs > 2 else np.zeros((0,))
-            num_detections = int(self.model.get_tensor(self.output_specs[3]['index'])[0]) if num_outputs > 3 else 0
+           # only one tensor output for detection
+            raw = self.model.get_tensor(self.output_specs[0]['index'])[0]
+            count = int(raw[0])
+            boxes   = raw[1:count+1, :4]          # [N,4]
+            classes = raw[1:count+1, 4].astype(int)  # [N]
+            scores  = raw[1:count+1, 5]              # [N]
+            num_detections = count
 
             findings = []
             print("Top detections:")
