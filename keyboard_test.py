@@ -192,18 +192,19 @@ class CVTesting:
                     os.remove(os.path.join(save_captures, old_photo))
                 print(f"Cleaned up {len(photos) - cleanup} old photos")
             
-            image_prepared = cv2.resize(image, (self.input_width, self.input_height))
-            input_tensor = np.expand_dims(image_prepared, axis=0).astype(np.uint8)
+            image_prepared = cv2.resize(image, (self.input_width, self.input_height)).astype(np.float32)
+            input_tensor = np.expand_dims(image_prepared, axis=0) / 255.0
 
             # post-image capture
             self.model.set_tensor(self.input_specs[0]['index'], input_tensor)
             self.model.invoke()
 
-            boxes = self.model.get_tensor(self.output_specs[0]['index'])[0]
-            classes = self.model.get_tensor(self.output_specs[1]['index'])[0]
-            scores = self.model.get_tensor(self.output_specs[2]['index'])[0]
-            num_detections = int(self.model.get_tensor(self.output_specs[3]['index'])[0])
-            
+            num_outputs = len(self.output_specs)
+            boxes   = self.model.get_tensor(self.output_specs[0]['index'])[0] if num_outputs > 0 else np.zeros((0, 4))
+            classes = self.model.get_tensor(self.output_specs[1]['index'])[0] if num_outputs > 1 else np.zeros((0,))
+            scores  = self.model.get_tensor(self.output_specs[2]['index'])[0] if num_outputs > 2 else np.zeros((0,))
+            num_detections = int(self.model.get_tensor(self.output_specs[3]['index'])[0]) if num_outputs > 3 else 0
+
             findings = []
             print("Top detections:")
             detection_details = []  
