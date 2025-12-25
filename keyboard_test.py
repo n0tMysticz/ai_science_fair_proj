@@ -195,8 +195,9 @@ class CVTesting:
                 print(f"Cleaned up {len(photos) - cleanup} old photos")
             
             image_prepared = cv2.resize(image, (self.input_width, self.input_height))
-            input_tensor = np.expand_dims(image_prepared, axis=0).astype(np.uint8)
-
+            image_prepared = cv2.cvtColor(image_prepared, cv2.COLOR_BGR2RGB)
+            input_tensor   = np.expand_dims(image_prepared, axis=0).astype(np.uint8)
+            
             # post-image capture
             self.model.set_tensor(self.input_specs[0]['index'], input_tensor)
             self.model.invoke()
