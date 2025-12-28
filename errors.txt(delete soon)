@@ -1,1 +1,0 @@
-Frame analysis failed: Cannot set tensor: Got value of type UINT8 but expected type FLOAT32 for input 0, name: serving_default_inputs:0 
