@@ -68,7 +68,7 @@ class CVTesting:
     Computer vision model for GPIO button control.
     """
     def __init__(self):
-        print("Starting computer vision...")
+        self.speak("Starting computer vision!")
         
         try:
             self.model = litert.Interpreter(model_path=cv_model)
@@ -140,9 +140,11 @@ class CVTesting:
         """volume up/down based on button press duration."""
         if duration < self.hold_time:
             print(f"Volume up (Duration: {duration:.2f}s)")
-            os.system("amixer -c 2 sset Speaker 1%+ 2>/dev/null || amixer -c 2 sset PCM 1%+ 2>/dev/null")
+            self.speak("Volume up")
+            os.system("amixer -c 2 sset Speaker 5%+ 2>/dev/null || amixer -c 2 sset PCM 1%+ 2>/dev/null")
         else:
             print(f"Volume down (Duration: {duration:.2f}s)")
+            self.speak("Volume down")
             os.system("amixer -c 2 sset Speaker 5%- 2>/dev/null || amixer -c 2 sset PCM 5%- 2>/dev/null")
 
     def determine_location(self, x_center_offset):
@@ -276,7 +278,7 @@ class CVTesting:
             
             picam2 = Picamera2()
             config = picam2.create_preview_configuration(
-                main={"format": "RGB888", "size": (640, 480)},
+                main={"format": "RGB888", "size": (1280, 720)},
                 controls={"AfMode": 2}
             )
             picam2.configure(config)
