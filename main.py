@@ -278,7 +278,7 @@ class CVTesting:
             
             picam2 = Picamera2()
             config = picam2.create_preview_configuration(
-                main={"format": "RGB888", "size": (1280, 720)},
+                main={"format": "RGB888", "size": (640, 480)},
                 controls={"AfMode": 2}
             )
             picam2.configure(config)
