@@ -1,6 +1,6 @@
 ## Auto-Start on Boot
 
-To configure the vision assistant to run automatically when your Raspberry Pi starts:
+To configure the script to run automatically when your Raspberry Pi starts:
 
 ### 1. Create the systemd service file
 ```bash
