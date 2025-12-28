@@ -35,7 +35,7 @@ main_folder = os.path.expanduser("~/ai_science_fair_proj")
 cv_model = os.path.join(main_folder, "detect.tflite") # it's a mobiledet ssdlite model
 categories = os.path.join(main_folder, "labelmap.txt")
 save_captures = os.path.join(main_folder, "captures")
-detection_log = os.path.join(main_folder, "detection_log.txt")  # ADDED HERE - Line 34
+detection_log = os.path.join(main_folder, "detection_log.txt")  
 cleanup = 25 # photos until deletion
 
 if not os.path.exists(save_captures):
