@@ -17,14 +17,14 @@ import subprocess
 #    - Resolved Pylance environment issues for 'cv2' and 'ai_edge_litert'.
 #    - Implemented 'pynput' keyboard listeners to simulate GPIO button hardware events.
 # 2. Computer Vision & Inference (Lines 57-70, 186-226):
-#    - Integrated LiteRT (TFLite) interpreter for on-device inference.
-#    - Assisted in mapping model output tensors to readable label arrays.
+#    - Gemini 3 Flash provided implementation details for LiteRT 
+#      Interpreter (LiteRT), including tensor allocation (saving ram for the AI) and getting raw AI data into a useable format for this project.
 # 3. Audio & TTS Pipeline (Lines 130-180):
-#    - Debugged 'amixer' shell commands for USB audio card channel management (-c 2).
-#    - Structured the subprocess pipeline to stream Piper TTS text-to-speech to 'aplay'.
+#    - Claude 4.5 Sonnet helped structure the audio pipeline to route text 
+#      through Piper and stream raw audio to 'aplay' or straight directly to the tts system where there is no audio latency.
 # 4. Image Processing & Logic (Lines 129-136, 261-276):
-#    - GitHub Copilot provided direction for spatial object detection (Left/Right/Front).
-#    - Claude 3.5 Sonnet assisted with OpenCV frame rotation and UI text overlays.
+#    - Gemini 3 Flash provided direction for spatial object detection (Left/Right/Front).
+#    - Claude 4.5 Sonnet assisted with OpenCV frame rotation and UI text overlays.
 # 5. Logging Camera Data and Results (lines 37, 237-242)
 #    - Claude 4.5 Sonnet assisted with logging to a text file for debugging and record-keeping.
 # --- END AI ACKNOWLEDGEMENTS SECTION ---
@@ -43,7 +43,7 @@ if not os.path.exists(save_captures):
 
 confidence_minimum = 0.55
 
-camera_rotation = 0
+camera_rotation = 180
 
 # Piper TTS configuration
 piper_path = os.path.join(main_folder, "piper", "piper") 

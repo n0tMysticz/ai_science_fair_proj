@@ -25,11 +25,11 @@ import RPi.GPIO as GPIO
 # 4. Audio & Volume Control (Lines 111-125):
 #    - Claude 4.5 Sonnet identified 'amixer' control failures and provided the correct 
 #      shell commands for Raspberry Pi 'Speaker' and 'PCM' channels.
-# 5. Piper TTS Integration (Lines 167-186 ):
+# 5. Piper TTS Integration (Lines 167-186):
 #    - Claude 4.5 Sonnet helped structure the audio pipeline to route text 
 #      through Piper and stream raw audio to 'aplay' or straight directly to the tts system where there is no audio latency.
 # 6. Camera Preview & Rotation Logic (Lines 216-240):
-#    - Claude 4.5 Sonnet debugged the 'Picamera2' capture loop and integrated 
+#    - Claude 4.5 Sonnet debugged the 'Picamera2' capture code and integrated 
 #      OpenCV rotation constants for hardware-mounted camera adjustments.
 # 7. Object Detection Logic (Lines 143-150, 280-285):
 #    - Gemini 3 Flash suggested the logic for calculating object center-offsets 
