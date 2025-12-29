@@ -250,12 +250,11 @@ class CVTesting:
                         article = "an" if label.lower().startswith(('a', 'e', 'i', 'o', 'u')) else "a"
                         findings.append(f"{article} {label} {direction}")
             
-            msg = f"I see: {' and '.join(findings)}" if findings else "No objects found were detected."
+            msg = f"I see: {' and '.join(findings)}" if findings else "No objects were detected."
             
             timestamp = time.strftime("%Y%m%d-%H%M%S")
             filename = os.path.join(save_captures, f"capture_{timestamp}.jpg")
-            image_saved = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-            cv2.imwrite(filename, image_saved)
+            cv2.imwrite(filename, image)
             print(f"  Photo saved to: {filename}")
             
             log_timestamp = time.strftime("%Y-%m-%d %H:%M:%S")

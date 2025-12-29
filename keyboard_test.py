@@ -194,7 +194,7 @@ class CVTesting:
                 for old_photo in photos[:-cleanup]:
                     os.remove(os.path.join(save_captures, old_photo))
                 print(f"Cleaned up {len(photos) - cleanup} old photos")
-            
+                
             image_bgr = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
             image_prepared_bgr = cv2.resize(image_bgr, (self.input_width, self.input_height))
             image_prepared_rgb = cv2.cvtColor(image_prepared_bgr, cv2.COLOR_BGR2RGB)
@@ -213,7 +213,7 @@ class CVTesting:
             findings = []
             print("Top detections:")
             detection_details = []  
-            height, width = image.shape[:2]
+            height, width = image_bgr.shape[:2]
             for i in range(min(num_detections, 10)):
                 score = float(scores[i])
                 class_id = int(classes[i])
@@ -224,7 +224,7 @@ class CVTesting:
                 
                 if score > confidence_minimum:
                     ymin, xmin, ymax, xmax = boxes[i]
-                    cv2.rectangle(image, (int(xmin * width), int(ymin * height)), (int(xmax * width), int(ymax * height)), (255, 0, 0), 2)
+                    cv2.rectangle(image_bgr, (int(xmin * width), int(ymin * height)), (int(xmax * width), int(ymax * height)), (255, 0, 0), 2)
                     
                     center_x = float((xmin + xmax) / 2)
                     class_id = int(classes[i])
@@ -239,8 +239,7 @@ class CVTesting:
             
             timestamp = time.strftime("%Y%m%d-%H%M%S")
             filename = os.path.join(save_captures, f"capture_{timestamp}.jpg")
-            image_saved = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-            cv2.imwrite(filename, image_saved)
+            cv2.imwrite(filename, image)
             print(f"  Photo saved to: {filename}")
         
             log_timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
@@ -282,7 +281,7 @@ class CVTesting:
                 try:
                     frame_rgb = picam2.capture_array()
                     frame = frame_rgb.copy()
-
+                    
                     if camera_rotation == 90:
                         frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
                     elif camera_rotation == 180:
