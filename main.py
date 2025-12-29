@@ -56,7 +56,7 @@ if not os.path.exists(save_captures):
 
 confidence_minimum = 0.55
 
-camera_rotation = 0
+camera_rotation = 180
 
 # Piper TTS configuration
 piper_path = os.path.join(main_folder, "piper", "piper") 
@@ -211,9 +211,11 @@ class CVTesting:
                     os.remove(os.path.join(save_captures, old_photo))
                 print(f"Cleaned up {len(photos) - cleanup} old photos")
             
-            image_prepared = cv2.resize(image, (self.input_width, self.input_height))
-            input_tensor = np.expand_dims(image_prepared, axis=0)
-
+            image_bgr = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            image_prepared_bgr = cv2.resize(image_bgr, (self.input_width, self.input_height))
+            image_prepared_rgb = cv2.cvtColor(image_prepared_bgr, cv2.COLOR_BGR2RGB)
+            input_tensor = np.expand_dims(image_prepared_rgb, axis=0).astype(np.uint8)
+            
             # post-image capture
             self.model.set_tensor(self.input_specs[0]['index'], input_tensor)
             self.model.invoke()
@@ -252,7 +254,8 @@ class CVTesting:
             
             timestamp = time.strftime("%Y%m%d-%H%M%S")
             filename = os.path.join(save_captures, f"capture_{timestamp}.jpg")
-            cv2.imwrite(filename, image)
+            image_saved = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            cv2.imwrite(filename, image_saved)
             print(f"  Photo saved to: {filename}")
             
             log_timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
