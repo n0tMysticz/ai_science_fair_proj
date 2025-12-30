@@ -36,7 +36,7 @@ cv_model = os.path.join(main_folder, "detect.tflite") # it's a mobiledet ssdlite
 categories = os.path.join(main_folder, "labelmap.txt")
 save_captures = os.path.join(main_folder, "captures")
 detection_log = os.path.join(main_folder, "detection_log.txt")  
-cleanup = 25 # photos until deletion
+cleanup = 50 # photos until deletion
 
 if not os.path.exists(save_captures):
     os.makedirs(save_captures)
