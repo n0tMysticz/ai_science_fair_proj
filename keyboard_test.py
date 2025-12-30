@@ -224,7 +224,7 @@ class CVTesting:
                 
                 if score > confidence_minimum:
                     ymin, xmin, ymax, xmax = boxes[i]
-                    cv2.rectangle(image_bgr, (int(xmin * width), int(ymin * height)), (int(xmax * width), int(ymax * height)), (255, 0, 0), 2)
+                    cv2.rectangle(image, (int(xmin * width), int(ymin * height)), (int(xmax * width), int(ymax * height)), (255, 0, 0), 2)
                     
                     center_x = float((xmin + xmax) / 2)
                     class_id = int(classes[i])
