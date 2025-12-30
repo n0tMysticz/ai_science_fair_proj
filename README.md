@@ -1,4 +1,4 @@
-this was for my science fair at baton rouge magnet high, you can use this project for whatever you want.
+This was for my science fair at Baton Rouge Magnet High School. You can use this project for whatever you want.
 
 ## Dependencies
 
@@ -18,8 +18,7 @@ This project requires the following Python libraries to be installed on your Ras
 pip install opencv-python numpy pynput picamera2 ai-edge-litert
 
 # Install Piper TTS (requires separate installation)
-# Download from: https://github.com/rhasspy/piper
-```
+# Download from: https://github.com/OHF-Voice/piper1-gpl
 
 ### Hardware Requirements
 - Raspberry Pi 5 (tested) or compatible model
