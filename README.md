@@ -19,7 +19,7 @@ pip install opencv-python numpy pynput picamera2 ai-edge-litert
 
 # Install Piper TTS (requires separate installation)
 # Download from: https://github.com/OHF-Voice/piper1-gpl
-
+```
 ### Hardware Requirements
 - Raspberry Pi 5 (tested) or compatible model
 - Raspberry Pi Camera Module (I've used IMX708)
