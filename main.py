@@ -40,8 +40,8 @@ import RPi.GPIO as GPIO
 # --- END AI ACKNOWLEDGEMENTS SECTION --- 
 
 # --- GPIO config ---
-Camera_Button = 17
-Volume_Button = 26
+Camera_Button = 26
+Volume_Button = 17
 
 # path of the parts
 main_folder = os.path.expanduser("~/ai_science_fair_proj")
