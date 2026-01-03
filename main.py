@@ -313,7 +313,7 @@ class CVTesting:
                         self.is_ai_needed = False
                         
                         results = self.analyze_frame(frame)
-                        msg = f"I see: {' and '.join(results)}" if results else "No objects found were detected."
+                        msg = f"I see: {' and '.join(results)}" if results else "No objects were detected."
                         print(f"{msg}")
                         
                         self.speak(msg)
