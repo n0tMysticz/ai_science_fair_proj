@@ -96,8 +96,9 @@ class CVTesting:
         self.is_ai_needed = False
         self.volume_pressed = False
         self.timer_start = 0
-        self.hold_time = 0.5
+        self.hold_time = 0.2
         self.exit = False
+        
         
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(Camera_Button, GPIO.IN, pull_up_down=GPIO.PUD_UP)
