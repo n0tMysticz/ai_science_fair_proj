@@ -35,7 +35,7 @@ import RPi.GPIO as GPIO
 #    - Gemini 3 Flash suggested the logic for calculating object center-offsets 
 #      to provide directional feedback (Left/Front/Right).
 #    - Github Copilot assisted the debugging for OpenCV's rgb2bgr conversion.
-# 8. Logging Camera Data and Results (lines 5, 257-262)
+# 8. Logging Camera Data and Results (lines 8, 257-262)
 #    - Claude 4.5 Sonnet structured the logging to save images and log results.
 # --- END AI ACKNOWLEDGEMENTS SECTION --- 
 
@@ -274,10 +274,6 @@ class CVTesting:
         picam2 = None
         try:
             print("System Active.")
-            print("-> GPIO Pin 17: Capture photo")
-            print("-> GPIO Pin 26: Volume control (tap/hold)")
-            print("-> Press ESC key for emergency exit")
-            
             picam2 = Picamera2()
             config = picam2.create_preview_configuration(
                 main={"format": "RGB888", "size": (640, 480)},
