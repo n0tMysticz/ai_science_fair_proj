@@ -142,7 +142,7 @@ class CVTesting:
         if duration < self.hold_time:
             print(f"Volume up (Duration: {duration:.2f}s)")
             self.speak("Volume up")
-            os.system("amixer -c 2 sset Speaker 5%+ 2>/dev/null || amixer -c 2 sset PCM 1%+ 2>/dev/null")
+            os.system("amixer -c 2 sset Speaker 5%+ 2>/dev/null || amixer -c 2 sset PCM 5%+ 2>/dev/null")
         else:
             print(f"Volume down (Duration: {duration:.2f}s)")
             self.speak("Volume down")
