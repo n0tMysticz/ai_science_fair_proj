@@ -96,7 +96,7 @@ class CVTesting:
         self.is_ai_needed = False
         self.volume_pressed = False
         self.timer_start = 0
-        self.hold_time = 0.2
+        self.hold_time = 0.4
         self.exit = False
         
         
