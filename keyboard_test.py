@@ -32,7 +32,7 @@ import subprocess
 
 # path of the parts
 main_folder = os.path.expanduser("~/ai_science_fair_proj")
-cv_model = os.path.join(main_folder, "detect.tflite") # it's a mobiledet ssdlite model
+cv_model = os.path.join(main_folder, "detect.tflite") # it's an efficientdet - lite2 model
 categories = os.path.join(main_folder, "labelmap.txt")
 save_captures = os.path.join(main_folder, "captures")
 detection_log = os.path.join(main_folder, "detection_log.txt")  
